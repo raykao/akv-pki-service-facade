@@ -1,16 +1,9 @@
-﻿namespace AzureGbb.AppDev.Pki.Services;
+﻿namespace AzureGBB.AppDev.Pki.Services;
 
 public abstract class CertificateAuthority
 {
-	public abstract String? GetRootCertificate();
-	public abstract void GenerateRootCa();
-	public abstract Task<byte[]> CreateRootCaInKeyVaultAsync();
-	public abstract Byte[] CreateRootCaInLocal();
-	public abstract void UploadRootCaToKeyVault(Byte[] certificate);
-	public void CreateRootCaInLocalAndUploadToKeyVault()
-	{
-		Byte[] certificate = CreateRootCaInLocal();
-		UploadRootCaToKeyVault(certificate);
-	}
+	protected abstract String? GetRootCertificate();
+	protected abstract void GenerateRootCa();
+	protected  abstract void CreateRootCaInKeyVault();
 	public abstract Byte[]? SignContentWithRootCa(Byte[] content);
 }
