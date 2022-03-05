@@ -25,6 +25,11 @@ Azure Key Vault does not today provide the ability to act as a Root CA out of th
 ## Notes
 - AKV can generate self-signed certificates via the Azure Portal, SDKs and REST APIs.  However it does not expose the ability to make these certificates as Root CA via Portal and SDKs (specifically dotnet/C#).  The REST API however does and so in the app implementations for generating a Root CA (signing certificate) we must use an authenticated REST call to create/generate the Root CA instead of using the native SDK(s)
 
+## Questions/Issues
+- Should we be using IConfiguration and inject config object to get settings values?
+- Should we revert to v3 of the Azure-sdk-for-dotnet (Microsoft.Azure.KeyVault)? Specifically for the creation of the Self-Signed CA Cert in AKV?
+- Use of a ```JsonConverter``` for UTC time on ```models.attribtes``` base class?
+
 ## Initial Design Diagram
 
 ![Initial design diagram](/img/initial-diagram.png)
