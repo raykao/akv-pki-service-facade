@@ -68,6 +68,8 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		// Version 4 of the KeyVault SDK does not allow the use of a full Custom Certificate Policy
 		// We will instead create a certificate in KeyVault "manually" via the REST API but using our
 		// AuthToken we would normally use for the SDK (Azure Identity)
+		// 
+		// Potentially we could revert to v3 of the SDK and KeyVaultClient().CreateCertificateAsync() instead
 		//  
 		// - Get Auth Token
 		// - Create Certificate Policy
