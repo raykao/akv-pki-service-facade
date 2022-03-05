@@ -86,6 +86,8 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			)
 		);
 
+		KeyProperties keyProperties = new KeyProperties(false, "RSA", 2048, false);
+
 		X509CertificateProperties x509CertificateProperty = new X509CertificateProperties(
 			"CN=" + this._fqdn,
 			keyUsage: new List<string> {"keyCertSign"},
@@ -96,7 +98,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		IssuerParameters issuerParameters = new IssuerParameters("Self");
 
 		CertificatePolicy certificate = new CertificatePolicy(
-			keyProperties: new KeyProperties(false, "RSA", 2048, false),
+			keyProperties: keyProperties,
 			x509CertificateProperties: x509CertificateProperty,
 			issuerParameters: issuerParameters
 		);
