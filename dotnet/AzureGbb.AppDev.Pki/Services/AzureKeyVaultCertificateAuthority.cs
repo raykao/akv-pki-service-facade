@@ -16,6 +16,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 
 	private readonly string vaultName;
 	private readonly string _keyName;
+	private readonly string _fqdn;
 	private readonly String _vaultUri;
 	private readonly DefaultAzureCredential _credential = new DefaultAzureCredential();
 	private readonly KeyClient _keyClient;
@@ -26,11 +27,12 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 
 	private readonly ILogger<AzureKeyVaultCertificateAuthority> _logger;
 
-	public AzureKeyVaultCertificateAuthority(ILogger<AzureKeyVaultCertificateAuthority> logger, string vaultName, string keyName)
+	public AzureKeyVaultCertificateAuthority(ILogger<AzureKeyVaultCertificateAuthority> logger, string vaultName, string keyName, string fqdn)
 	{
 		this._logger = logger;
 		this.vaultName = vaultName;
 		this._keyName = keyName;
+		this._fqdn = fqdn;
 
 		this._vaultUri = "https://" + this.vaultName + ".vault.azure.net/";
 		
@@ -85,7 +87,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		);
 
 		X509CertificateProperties x509CertificateProperty = new X509CertificateProperties(
-			"CN=" + this._keyName,
+			"CN=" + this._fqdn,
 			keyUsage: new List<string> {"keyCertSign"},
  			ekus: new List<string> {"1.3.6.1.5.5.7.3.2", "1.3.6.1.5.5.7.3.1"},
 			basicConstraints: new BasicConstraints(true, 1)
