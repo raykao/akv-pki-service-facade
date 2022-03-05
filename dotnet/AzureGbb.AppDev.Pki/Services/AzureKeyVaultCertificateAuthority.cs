@@ -82,7 +82,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 
 		X509CertificateProperties x509CertificateProperty = new X509CertificateProperties(
 			"CN=" + this._keyName,
-			keyUsage: new List<string> {"KeyCertSign"},
+			keyUsage: new List<string> {"keyCertSign"},
  			ekus: new List<string> {"1.3.6.1.5.5.7.3.2", "1.3.6.1.5.5.7.3.1"},
 			basicConstraints: new BasicConstraints(true, 1)
 		);
