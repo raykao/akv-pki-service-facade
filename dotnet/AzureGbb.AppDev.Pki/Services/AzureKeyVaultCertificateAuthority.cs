@@ -6,7 +6,7 @@ using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Identity;
 using Azure.Core;
 
-
+using AzureGBB.AppDev.Pki.Models;
 
 namespace AzureGBB.AppDev.Pki.Services;
 
@@ -79,6 +79,8 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 				null
 			)
 		);
+
+		X509CertificateProperties x509CertificateProperty = new X509CertificateProperties();
 
 		StringContent content = new StringContent("");
 
