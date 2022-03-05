@@ -10,7 +10,7 @@ public partial class X509CertificateProperties
 		SubjectAlternativeNames? subjectAlternativeNames = default(SubjectAlternativeNames), 
 		IList<string>? keyUsage = default(IList<string>), 
 		int? validityInMonths = default(int?),
-		BasicConstraintsExtension? basicConstraints = null
+		BasicConstraints? basicConstraints = null
 	)
 	{
 		Subject = subject;
@@ -37,5 +37,5 @@ public partial class X509CertificateProperties
 	public int? ValidityInMonths { get; set; }
 
 	[JsonProperty("basic_constraints")]
-	public BasicConstraintsExtension? BasicConstraints { get; set; }
+	public BasicConstraints? BasicConstraints { get; set; }
 }

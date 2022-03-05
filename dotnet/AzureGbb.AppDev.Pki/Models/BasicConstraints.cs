@@ -1,9 +1,9 @@
 using Newtonsoft.Json;
 
 namespace AzureGBB.AppDev.Pki.Models;
-public class BasicConstraintsExtension
+public class BasicConstraints
 {
-	public BasicConstraintsExtension(bool isCa, int pathLenConstraint)
+	public BasicConstraints(bool isCa, int pathLenConstraint)
 	{
 		IsCA = isCa;
 		PathLenConstraint = pathLenConstraint;

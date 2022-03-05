@@ -6,9 +6,9 @@ using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Identity;
 using Azure.Core;
 
-using AzureGBB.AppDev.Pki.Models;
-
 namespace AzureGBB.AppDev.Pki.Services;
+using AzureGBB.AppDev.Pki.Models;
+using System.Text.Json;
 
 public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 {
@@ -80,14 +80,27 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			)
 		);
 
-		X509CertificateProperties x509CertificateProperty = new X509CertificateProperties();
+		X509CertificateProperties x509CertificateProperty = new X509CertificateProperties(
+			"CN=" + this._keyName,
+			keyUsage: new List<string> {"KeyCertSign"},
+ 			ekus: new List<string> {"1.3.6.1.5.5.7.3.2", "1.3.6.1.5.5.7.3.1"},
+			basicConstraints: new BasicConstraints(true, 1)
+		);
 
-		StringContent content = new StringContent("");
+		IssuerParameters issuerParameters = new IssuerParameters("Self");
+
+		CertificatePolicy certificate = new CertificatePolicy(
+			keyProperties: new KeyProperties(false, "RSA", 2048, false),
+			x509CertificateProperties: x509CertificateProperty,
+			issuerParameters: issuerParameters
+		);
+		
+		StringContent content = new StringContent(JsonSerializer.Serialize(certificate));
 
 		HttpClient httpClient = new HttpClient();
 
 		HttpResponseMessage response = await httpClient.PostAsync(
-			requestUri: this._vaultUri,
+			requestUri: this._vaultUri + "/certificates/" + this._keyName,
 			content: content
 		);
 	}
