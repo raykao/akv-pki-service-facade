@@ -4,6 +4,9 @@ using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Identity;
+using Azure.Core;
+
+
 
 namespace AzureGBB.AppDev.Pki.Services;
 
@@ -17,7 +20,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	private readonly CryptographyClient _cryptographyClient;
 	private readonly CertificateClient _certificateClient;
 	private readonly KeyVaultKey _key;
-	private readonly String? _rootCertificate;
+	public readonly String? rootCertificate;
 
 	private readonly ILogger<AzureKeyVaultCertificateAuthority> _logger;
 
@@ -49,7 +52,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			this._key = this._keyClient.GetKey(this._keyName);
 		}
 
-		this._rootCertificate = GetRootCertificate();
+		this.rootCertificate = GetRootCertificate();
 		
 		this._cryptographyClient = new CryptographyClient(
 			keyId: this._key.Id, 
@@ -57,21 +60,41 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		);
 	}
 
-	override protected void GenerateRootCa(){
-		CreateRootCaInKeyVault();
+	protected override void GenerateRootCa(){
+		CreateRootCaInKeyVaultAsync();
 	}
 
-	override protected void CreateRootCaInKeyVault() {
-		// Create Certificate Policy
-		// Get Auth Token
-		// Make HTTP call to vault certificate endpoint with policy as payload
+	protected override async void CreateRootCaInKeyVaultAsync() {
+		// Version 4 of the KeyVault SDK does not allow the use of a full Custom Certificate Policy
+		// We will instead create a certificate in KeyVault "manually" via the REST API but using our
+		// AuthToken we would normally use for the SDK (Azure Identity)
+		//  
+		// - Get Auth Token
+		// - Create Certificate Policy
+		// - Make HTTP call to vault certificate endpoint with policy as payload
+
+		AccessToken token = await this._credential.GetTokenAsync(
+			new Azure.Core.TokenRequestContext(
+				new[] { "https://vault.azure.net/.default" },
+				null
+			)
+		);
+
+		StringContent content = new StringContent("");
+
+		HttpClient httpClient = new HttpClient();
+
+		HttpResponseMessage response = await httpClient.PostAsync(
+			requestUri: this._vaultUri,
+			content: content
+		);
 	}
 
-	override protected String GetRootCertificate() {
+	protected override String GetRootCertificate() {
 		return this._keyClient.GetKey(this._keyName).ToString();
 	}
 
-	override public Byte[]? SignContentWithRootCa(Byte[] content){
+	public override Byte[]? SignContentWithRootCa(Byte[] content){
 		return this._cryptographyClient.SignData("RS256", content).Signature;
 	}
 }
