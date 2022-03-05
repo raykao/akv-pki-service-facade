@@ -12,6 +12,8 @@ using System.Text.Json;
 
 public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 {
+	private readonly HttpClient httpClient = new HttpClient();
+
 	private readonly string vaultName;
 	private readonly string _keyName;
 	private readonly String _vaultUri;
@@ -99,9 +101,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		
 		StringContent content = new StringContent(JsonSerializer.Serialize(certificate));
 
-		HttpClient httpClient = new HttpClient();
-
-		HttpResponseMessage response = await httpClient.PostAsync(
+		HttpResponseMessage response = await this.httpClient.PostAsync(
 			requestUri: this._vaultUri + "/certificates/" + this._keyName,
 			content: content
 		);
