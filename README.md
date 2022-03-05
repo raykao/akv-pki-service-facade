@@ -30,6 +30,21 @@ Azure Key Vault does not today provide the ability to act as a Root CA out of th
 - Should we revert to v3 of the Azure-sdk-for-dotnet (Microsoft.Azure.KeyVault)? Specifically for the creation of the Self-Signed CA Cert in AKV?
 - Use of a ```JsonConverter``` for UTC time on ```models.attribtes``` base class?
 
+## Missing
+- ACME API interface to issue leaf (service) certificates
+	- Will need to build out the mvc/webapp to handle HTTP/DNS auth challenge from an ACME client (e.g. certmanager)
+- Environment/Infrastructure build scripts; Ability to provision service:
+	- Compute Service
+	- VNET/Subnet
+	- Azure Key Vault
+	- Azure Private DNS Zone
+	- Private DNS Zone A record -> Compute Service IP Address
+	- Azure Active Directory App Registration (Service Principal)
+	- Azure Key Vault Access Policy for App/Service Principal
+		- Certificate Create/Update (Self Signed Root CA BootStrapping)
+		- Key Get Public Data (Root CA)
+		- Key Crytography Sign (keyCertSign)
+
 ## Initial Design Diagram
 
 ![Initial design diagram](/img/initial-diagram.png)
