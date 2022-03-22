@@ -24,9 +24,9 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	private readonly string _fqdn;
 	private readonly String _vaultUri;
 	private readonly KeyClient _keyClient;
-	// private readonly CryptographyClient _cryptographyClient;
 	private readonly CertificateClient _certificateClient;
-	private readonly KeyVaultKey _key;
+	// private readonly CryptographyClient _cryptographyClient;
+	private readonly KeyVaultKey _keyMetadata;
 	private readonly ILogger<AzureKeyVaultCertificateAuthority> _logger;
 	public readonly Byte[] rootCertificate;
 
@@ -52,7 +52,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 
 		try {
 			this._logger.LogInformation("Attempting to get Key: " + keyName);
-			this._key = this._keyClient.GetKey(this._keyName);
+			this._keyMetadata = this._keyClient.GetKey(this._keyName);
 		}
 		catch(Azure.RequestFailedException error)
 		{
@@ -60,20 +60,20 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			this._logger.LogInformation(error.ToString());
 			
 			GenerateRootCa();
-			this._key = this._keyClient.GetKey(this._keyName);
+			this._keyMetadata = this._keyClient.GetKey(this._keyName);
 		}
 
 		this.rootCertificate = GetRootCertificate();
 		
 		// this._cryptographyClient = new CryptographyClient(
-		// 	keyId: this._key.Id, 
+		// 	keyId: this._keyMetadata.Id, 
 		// 	credential: this._credential
 		// );
 		
 	}
 
 	protected override void GenerateRootCa(){
-		this._logger.LogInformation("Generating RootCA.");
+		this._logger.LogInformation("Synchronously Generating RootCA.");
 		CreateRootCaInKeyVault();
 	}
 
@@ -95,9 +95,8 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			)
 		);
 
-		String bearerToken = "Bearer " + token.Token;
-
 		String requestUri = this._vaultUri + "/certificates/" + this._keyName + "/create?api-version=7.0";
+		String bearerToken = "Bearer " + token.Token;
 
 		CertificatePolicy certificatePolicy = new CertificatePolicy(
 			keyProperties: new KeyProperties(),
