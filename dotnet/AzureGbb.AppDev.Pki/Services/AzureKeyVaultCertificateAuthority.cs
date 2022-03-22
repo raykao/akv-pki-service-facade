@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 using Microsoft.Extensions.Logging;
 
 using Azure.Security.KeyVault.Keys;
@@ -9,24 +11,27 @@ using Azure.Core;
 namespace AzureGBB.AppDev.Pki.Services;
 using AzureGBB.AppDev.Pki.Models;
 using System.Text.Json;
+using System.Text;
+using System.Net;
 
 public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 {
 	private readonly HttpClient httpClient = new HttpClient();
+	private readonly DefaultAzureCredential _credential = new DefaultAzureCredential();
 
 	private readonly string vaultName;
 	private readonly string _keyName;
 	private readonly string _fqdn;
 	private readonly String _vaultUri;
-	private readonly DefaultAzureCredential _credential = new DefaultAzureCredential();
 	private readonly KeyClient _keyClient;
-	private readonly CryptographyClient _cryptographyClient;
+	// private readonly CryptographyClient _cryptographyClient;
 	private readonly CertificateClient _certificateClient;
 	private readonly KeyVaultKey _key;
-	public readonly String? rootCertificate;
-
 	private readonly ILogger<AzureKeyVaultCertificateAuthority> _logger;
 
+	public readonly String? rootCertificate;
+
+	
 	public AzureKeyVaultCertificateAuthority(ILogger<AzureKeyVaultCertificateAuthority> logger, string vaultName, string keyName, string fqdn)
 	{
 		this._logger = logger;
@@ -45,30 +50,35 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			vaultUri: new Uri(this._vaultUri), 
 			credential: this._credential
 		);
-		
+
 		try {
+			this._logger.LogInformation("Attempting to get Key: " + keyName);
 			this._key = this._keyClient.GetKey(this._keyName);			
 		}
 		catch(Azure.RequestFailedException error)
 		{
+			this._logger.LogError("Key Not Found.  Attempting to Generate A Key.");
 			this._logger.LogInformation(error.ToString());
+			
 			GenerateRootCa();
-			this._key = this._keyClient.GetKey(this._keyName);
+			// this._key = this._keyClient.GetKey(this._keyName);
 		}
 
 		this.rootCertificate = GetRootCertificate();
 		
-		this._cryptographyClient = new CryptographyClient(
-			keyId: this._key.Id, 
-			credential: this._credential
-		);
+		// this._cryptographyClient = new CryptographyClient(
+		// 	keyId: this._key.Id, 
+		// 	credential: this._credential
+		// );
+		
 	}
 
 	protected override void GenerateRootCa(){
+		this._logger.LogInformation("Generating RootCA.");
 		CreateRootCaInKeyVaultAsync();
 	}
 
-	protected override async void CreateRootCaInKeyVaultAsync() {
+	protected override void CreateRootCaInKeyVaultAsync() {
 		// Version 4 of the KeyVault SDK does not allow the use of a full Custom Certificate Policy
 		// We will instead create a certificate in KeyVault "manually" via the REST API but using our
 		// AuthToken we would normally use for the SDK (Azure Identity)
@@ -79,12 +89,14 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		// - Create Certificate Policy
 		// - Make HTTP call to vault certificate endpoint with policy as payload
 
-		AccessToken token = await this._credential.GetTokenAsync(
+		AccessToken token =  this._credential.GetToken(
 			new Azure.Core.TokenRequestContext(
 				new[] { "https://vault.azure.net/.default" },
 				null
 			)
 		);
+
+		String requestUri = this._vaultUri + "/certificates/" + this._keyName + "/create?api-version=7.0";
 
 		KeyProperties keyProperties = new KeyProperties(false, "RSA", 2048, false);
 
@@ -97,25 +109,45 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 
 		IssuerParameters issuerParameters = new IssuerParameters("Self");
 
-		CertificatePolicy certificate = new CertificatePolicy(
+		CertificatePolicy certificatePolicy = new CertificatePolicy(
 			keyProperties: keyProperties,
 			x509CertificateProperties: x509CertificateProperty,
 			issuerParameters: issuerParameters
 		);
-		
-		StringContent content = new StringContent(JsonSerializer.Serialize(certificate));
 
-		HttpResponseMessage response = await this.httpClient.PostAsync(
-			requestUri: this._vaultUri + "/certificates/" + this._keyName,
-			content: content
+		Policy policy = new Policy(
+			certificatePolicy: certificatePolicy
 		);
+		
+		StringContent content = new StringContent(JsonConvert.SerializeObject(policy), Encoding.UTF8, "application/json");
+
+		this._logger.LogInformation("policy: " + policy);
+
+		HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post ,requestUri)
+		{
+			Content = content,
+			Headers = { 
+				{ HttpRequestHeader.Authorization.ToString(), "Bearer " + token.Token },
+				{ HttpRequestHeader.Accept.ToString(), "application/json" }
+			},
+		};
+
+		this._logger.LogInformation("content: " + JsonConvert.SerializeObject(policy));
+
+
+		HttpResponseMessage response = this.httpClient.Send(request);
+
+		StreamReader reader = new StreamReader(response.Content.ReadAsStream());
+            
+    this._logger.LogInformation(reader.ReadToEnd());
 	}
 
 	protected override String GetRootCertificate() {
-		return this._keyClient.GetKey(this._keyName).ToString();
+		// return this._keyClient.GetKey(this._keyName).ToString();
+		return "hello";
 	}
 
-	public override Byte[]? SignContentWithRootCa(Byte[] content){
-		return this._cryptographyClient.SignData("RS256", content).Signature;
-	}
+	// public override Byte[]? SignContentWithRootCa(Byte[] content){
+	// 	return this._cryptographyClient.SignData("RS256", content).Signature;
+	// }
 }
