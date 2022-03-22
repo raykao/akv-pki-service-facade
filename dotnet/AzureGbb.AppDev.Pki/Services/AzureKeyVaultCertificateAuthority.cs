@@ -27,10 +27,14 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	private readonly CryptographyClient _cryptographyClient;
 	private readonly KeyVaultKey _keyMetadata;
 	private readonly ILogger<AzureKeyVaultCertificateAuthority> _logger;
-	public readonly Byte[] rootCertificate;
+	public readonly Byte[] RootCertificate;
 
 	
-	public AzureKeyVaultCertificateAuthority(ILogger<AzureKeyVaultCertificateAuthority> logger, string vaultName, string keyName, string fqdn)
+	public AzureKeyVaultCertificateAuthority(
+		ILogger<AzureKeyVaultCertificateAuthority> logger, 
+		string vaultName, 
+		string keyName, 
+		string fqdn)
 	{
 		this._logger = logger;
 		this.vaultName = vaultName;
@@ -62,7 +66,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			this._keyMetadata = this._keyClient.GetKey(this._keyName);
 		}
 
-		this.rootCertificate = GetRootCertificate();
+		this.RootCertificate = GetRootCertificate();
 		
 		this._cryptographyClient = new CryptographyClient(
 			keyId: this._keyMetadata.Id, 
