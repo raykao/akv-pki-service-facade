@@ -72,22 +72,24 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		
 	}
 
-	protected override void GenerateRootCa(){
+	protected override void GenerateRootCa()
+	{
 		this._logger.LogInformation("Synchronously Generating RootCA.");
 		CreateRootCaInKeyVault();
 	}
 
-	protected override void CreateRootCaInKeyVault() {
-		// Version 4 of the KeyVault SDK does not allow the use of a full Custom Certificate Policy
-		// We will instead create a certificate in KeyVault "manually" via the REST API but using our
-		// AuthToken we would normally use for the SDK (Azure Identity)
-		// 
-		// Potentially we could revert to v3 of the SDK and KeyVaultClient().CreateCertificateAsync() instead
-		//  
-		// - Get Auth Token
-		// - Create Certificate Policy
-		// - Make HTTP call to vault certificate endpoint with policy as payload
 
+	// Version 4 of the KeyVault SDK does not allow the use of a full Custom Certificate Policy
+	// We will instead create a certificate in KeyVault "manually" via the REST v7 API but using our
+	// AuthToken we would normally use for the SDK (Azure Identity)
+	// 
+	// Potentially we could revert to v3 of the SDK and KeyVaultClient().CreateCertificateAsync() instead
+	//  
+	// - Get Auth Token
+	// - Create Certificate Policy
+	// - Make HTTP call to vault certificate endpoint with policy as payload
+	protected override void CreateRootCaInKeyVault()
+	{
 		AccessToken token =  this._credential.GetToken(
 			new Azure.Core.TokenRequestContext(
 				new[] { "https://vault.azure.net/.default" },
@@ -128,11 +130,13 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
     this._logger.LogDebug(reader.ReadToEnd());
 	}
 
-	protected override Byte[] GetRootCertificate() {
+	protected override Byte[] GetRootCertificate()
+	{
 		return this._certificateClient.GetCertificate(this._keyName).Value.Cer;
 	}
 
-	public override Byte[]? SignContentWithRootCa(Byte[] content){
+	public override Byte[]? SignContentWithRootCa(Byte[] content)
+	{
 		return this._cryptographyClient.SignData("RS256", content).Signature;
 	}
 }
