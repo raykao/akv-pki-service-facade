@@ -28,18 +28,14 @@ public partial class KeyProperties
     /// Microsoft.Azure.KeyVault.WebKey.JsonWebKeyCurveName. Possible values include: 'P-256', 'P-384',
     /// 'P-521', 'P-256K'</param>
     public KeyProperties(
-        bool? exportable = default(bool?),
-        string? keyType = default(string),
-        int? keySize = default(int?),
-        bool? reuseKey = default(bool?),
-        string? curve = default(string)
+        string curve,
+        string keyType,
+        int keySize
     )
     {
-        Exportable = exportable;
+        Curve = curve;
         KeyType = keyType;
         KeySize = keySize;
-        ReuseKey = reuseKey;
-        Curve = curve;
         CustomInit();
     }
 
@@ -52,28 +48,28 @@ public partial class KeyProperties
     /// Gets or sets indicates if the private key can be exported.
     /// </summary>
     [JsonProperty(PropertyName = "exportable")]
-    public bool? Exportable { get; set; }
-
-    /// <summary>
-    /// Gets or sets the type of key pair to be used for the certificate.
-    /// Possible values include: 'EC', 'EC-HSM', 'RSA', 'RSA-HSM', 'oct'
-    /// </summary>
-    [JsonProperty(PropertyName = "kty")]
-    public string? KeyType { get; set; }
-
-    /// <summary>
-    /// Gets or sets the key size in bits. For example: 2048, 3072, or 4096
-    /// for RSA.
-    /// </summary>
-    [JsonProperty(PropertyName = "key_size")]
-    public int? KeySize { get; set; }
+    public bool Exportable { get; } = false;
 
     /// <summary>
     /// Gets or sets indicates if the same key pair will be used on
     /// certificate renewal.
     /// </summary>
     [JsonProperty(PropertyName = "reuse_key")]
-    public bool? ReuseKey { get; set; }
+    public bool ReuseKey { get; } = false;
+
+    /// <summary>
+    /// Gets or sets the type of key pair to be used for the certificate.
+    /// Possible values include: 'EC', 'EC-HSM', 'RSA', 'RSA-HSM', 'oct'
+    /// </summary>
+    [JsonProperty(PropertyName = "kty")]
+    public string KeyType { get; set; } = "RSA";
+
+    /// <summary>
+    /// Gets or sets the key size in bits. For example: 2048, 3072, or 4096
+    /// for RSA.
+    /// </summary>
+    [JsonProperty(PropertyName = "key_size")]
+    public int KeySize { get; set; } = 2048;
 
     /// <summary>
     /// Gets or sets elliptic curve name. For valid values, see

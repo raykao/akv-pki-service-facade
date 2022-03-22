@@ -23,14 +23,14 @@ public partial class IssuerParameters
 	/// generated under this policy should be published to certificate
 	/// transparency logs.</param>
 	public IssuerParameters(
-		string? name = default(string),
-		string? certificateType = default(string),
-		bool? certificateTransparency = default(bool?)
+		bool certificateTransparency,
+		string certificateType,
+		string name
 	)
 	{
-		Name = name;
 		CertificateType = certificateType;
 		CertificateTransparency = certificateTransparency;
+		Name = name;
 		CustomInit();
 	}
 
@@ -44,7 +44,7 @@ public partial class IssuerParameters
 	/// names; for example, 'Self' or 'Unknown'.
 	/// </summary>
 	[JsonProperty(PropertyName = "name")]
-	public string? Name { get; set; }
+	public string Name { get; } = "Self";
 
 	/// <summary>
 	/// Gets or sets type of certificate to be requested from the issuer
@@ -58,6 +58,6 @@ public partial class IssuerParameters
 	/// policy should be published to certificate transparency logs.
 	/// </summary>
 	[JsonProperty(PropertyName = "cert_transparency")]
-	public bool? CertificateTransparency { get; set; }
+	public bool CertificateTransparency { get; set; } = false;
 
 }

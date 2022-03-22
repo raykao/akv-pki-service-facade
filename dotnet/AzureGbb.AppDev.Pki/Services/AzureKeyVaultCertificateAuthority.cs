@@ -28,8 +28,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	private readonly CertificateClient _certificateClient;
 	private readonly KeyVaultKey _key;
 	private readonly ILogger<AzureKeyVaultCertificateAuthority> _logger;
-
-	public readonly String? rootCertificate;
+	public readonly Byte[] rootCertificate;
 
 	
 	public AzureKeyVaultCertificateAuthority(ILogger<AzureKeyVaultCertificateAuthority> logger, string vaultName, string keyName, string fqdn)
@@ -61,7 +60,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			this._logger.LogInformation(error.ToString());
 			
 			GenerateRootCa();
-			// this._key = this._keyClient.GetKey(this._keyName);
+			this._key = this._keyClient.GetKey(this._keyName);
 		}
 
 		this.rootCertificate = GetRootCertificate();
@@ -100,27 +99,16 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 
 		String requestUri = this._vaultUri + "/certificates/" + this._keyName + "/create?api-version=7.0";
 
-		KeyProperties keyProperties = new KeyProperties(false, "RSA", 2048, false);
-
-		X509CertificateProperties x509CertificateProperty = new X509CertificateProperties(
-			"CN=" + this._fqdn,
-			keyUsage: new List<string> {"keyCertSign"},
- 			ekus: new List<string> {"1.3.6.1.5.5.7.3.2", "1.3.6.1.5.5.7.3.1"},
-			basicConstraints: new BasicConstraints(true, 1)
-		);
-
-		IssuerParameters issuerParameters = new IssuerParameters("Self");
-
 		CertificatePolicy certificatePolicy = new CertificatePolicy(
-			keyProperties: keyProperties,
-			x509CertificateProperties: x509CertificateProperty,
-			issuerParameters: issuerParameters
+			keyProperties: new KeyProperties(),
+			x509CertificateProperties: new X509CertificateProperties("CN=" + this._fqdn),
+			issuerParameters: new IssuerParameters()
 		);
 
 		Policy policy = new Policy(
 			certificatePolicy: certificatePolicy
 		);
-		
+
 		StringContent content = new StringContent(JsonConvert.SerializeObject(policy), Encoding.UTF8, "application/json");
 
 		HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post ,requestUri)
@@ -132,19 +120,17 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			}
 		};
 
-		this._logger.LogInformation("content: " + JsonConvert.SerializeObject(policy));
-
+		this._logger.LogDebug("content: " + JsonConvert.SerializeObject(policy));
 
 		HttpResponseMessage response = this.httpClient.Send(request);
 
 		StreamReader reader = new StreamReader(response.Content.ReadAsStream());
             
-    this._logger.LogInformation(reader.ReadToEnd());
+    this._logger.LogDebug(reader.ReadToEnd());
 	}
 
-	protected override String GetRootCertificate() {
-		// return this._keyClient.GetKey(this._keyName).ToString();
-		return "hello";
+	protected override Byte[] GetRootCertificate() {
+		return this._certificateClient.GetCertificate(this._keyName).Value.Cer;
 	}
 
 	// public override Byte[]? SignContentWithRootCa(Byte[] content){

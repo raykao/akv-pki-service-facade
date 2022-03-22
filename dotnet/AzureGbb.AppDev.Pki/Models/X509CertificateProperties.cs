@@ -25,17 +25,17 @@ public partial class X509CertificateProperties
 	public string? Subject { get; set; }
 
 	[JsonProperty(PropertyName = "ekus")]
-	public IList<string>? Ekus { get; set; }
+	public IList<string>? Ekus { get; set; } = new List<string> {"1.3.6.1.5.5.7.3.2", "1.3.6.1.5.5.7.3.1"};
 
 	[JsonProperty(PropertyName = "sans")]
 	public SubjectAlternativeNames? SubjectAlternativeNames { get; set; }
 
 	[JsonProperty(PropertyName = "key_usage")]
-	public IList<string>? KeyUsage { get; set; }
+	public IList<string>? KeyUsage { get; set; } = new List<string> {"keyCertSign"};
 
 	[JsonProperty(PropertyName = "validity_months")]
 	public int? ValidityInMonths { get; set; }
 
 	[JsonProperty("basic_constraints")]
-	public BasicConstraints? BasicConstraints { get; set; }
+	public BasicConstraints? BasicConstraints { get; set; } = new BasicConstraints(true, 1);
 }
