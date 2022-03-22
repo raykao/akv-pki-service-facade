@@ -10,7 +10,6 @@ using Azure.Core;
 
 namespace AzureGBB.AppDev.Pki.Services;
 using AzureGBB.AppDev.Pki.Models;
-using System.Text.Json;
 using System.Text;
 using System.Net;
 

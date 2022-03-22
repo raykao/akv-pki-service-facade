@@ -2,7 +2,7 @@
 
 public abstract class CertificateAuthority
 {
-	protected abstract Byte[] GetRootCertificate();
 	protected  abstract void CreateRootCaInKeyVault();
+	protected abstract Byte[] GetRootCertificate();
 	public abstract Byte[]? SignContentWithRootCa(Byte[] content);
 }
