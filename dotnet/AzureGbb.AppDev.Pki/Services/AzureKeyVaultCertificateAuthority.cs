@@ -56,10 +56,10 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		}
 		catch(Azure.RequestFailedException error)
 		{
-			this._logger.LogError("Key Not Found.  Attempting to Generate A Key.");
+			this._logger.LogError("Key Not Found.  Attempting to Create Root CA/Key in AKV.");
 			this._logger.LogInformation(error.ToString());
 			
-			GenerateRootCa();
+			CreateRootCaInKeyVault();
 			this._keyMetadata = this._keyClient.GetKey(this._keyName);
 		}
 
@@ -72,13 +72,6 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		
 	}
 
-	protected override void GenerateRootCa()
-	{
-		this._logger.LogInformation("Synchronously Generating RootCA.");
-		CreateRootCaInKeyVault();
-	}
-
-
 	// Version 4 of the KeyVault SDK does not allow the use of a full Custom Certificate Policy
 	// We will instead create a certificate in KeyVault "manually" via the REST v7 API but using our
 	// AuthToken we would normally use for the SDK (Azure Identity)
@@ -90,6 +83,8 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	// - Make HTTP call to vault certificate endpoint with policy as payload
 	protected override void CreateRootCaInKeyVault()
 	{
+		this._logger.LogInformation("Synchronously Generating RootCA.");
+
 		AccessToken token =  this._credential.GetToken(
 			new Azure.Core.TokenRequestContext(
 				new[] { "https://vault.azure.net/.default" },
