@@ -25,7 +25,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	private readonly String _vaultUri;
 	private readonly KeyClient _keyClient;
 	private readonly CertificateClient _certificateClient;
-	// private readonly CryptographyClient _cryptographyClient;
+	private readonly CryptographyClient _cryptographyClient;
 	private readonly KeyVaultKey _keyMetadata;
 	private readonly ILogger<AzureKeyVaultCertificateAuthority> _logger;
 	public readonly Byte[] rootCertificate;
@@ -65,10 +65,10 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 
 		this.rootCertificate = GetRootCertificate();
 		
-		// this._cryptographyClient = new CryptographyClient(
-		// 	keyId: this._keyMetadata.Id, 
-		// 	credential: this._credential
-		// );
+		this._cryptographyClient = new CryptographyClient(
+			keyId: this._keyMetadata.Id, 
+			credential: this._credential
+		);
 		
 	}
 
@@ -132,7 +132,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		return this._certificateClient.GetCertificate(this._keyName).Value.Cer;
 	}
 
-	// public override Byte[]? SignContentWithRootCa(Byte[] content){
-	// 	return this._cryptographyClient.SignData("RS256", content).Signature;
-	// }
+	public override Byte[]? SignContentWithRootCa(Byte[] content){
+		return this._cryptographyClient.SignData("RS256", content).Signature;
+	}
 }
