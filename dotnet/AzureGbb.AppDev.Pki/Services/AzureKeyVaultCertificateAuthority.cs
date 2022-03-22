@@ -75,10 +75,10 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 
 	protected override void GenerateRootCa(){
 		this._logger.LogInformation("Generating RootCA.");
-		CreateRootCaInKeyVaultAsync();
+		CreateRootCaInKeyVault();
 	}
 
-	protected override void CreateRootCaInKeyVaultAsync() {
+	protected override void CreateRootCaInKeyVault() {
 		// Version 4 of the KeyVault SDK does not allow the use of a full Custom Certificate Policy
 		// We will instead create a certificate in KeyVault "manually" via the REST API but using our
 		// AuthToken we would normally use for the SDK (Azure Identity)
