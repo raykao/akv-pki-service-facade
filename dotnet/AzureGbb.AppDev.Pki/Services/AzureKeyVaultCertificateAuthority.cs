@@ -53,7 +53,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 
 		try {
 			this._logger.LogInformation("Attempting to get Key: " + keyName);
-			this._key = this._keyClient.GetKey(this._keyName);			
+			this._key = this._keyClient.GetKey(this._keyName);
 		}
 		catch(Azure.RequestFailedException error)
 		{
@@ -96,6 +96,8 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			)
 		);
 
+		String bearerToken = "Bearer " + token.Token;
+
 		String requestUri = this._vaultUri + "/certificates/" + this._keyName + "/create?api-version=7.0";
 
 		KeyProperties keyProperties = new KeyProperties(false, "RSA", 2048, false);
@@ -121,15 +123,13 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		
 		StringContent content = new StringContent(JsonConvert.SerializeObject(policy), Encoding.UTF8, "application/json");
 
-		this._logger.LogInformation("policy: " + policy);
-
 		HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post ,requestUri)
 		{
 			Content = content,
 			Headers = { 
-				{ HttpRequestHeader.Authorization.ToString(), "Bearer " + token.Token },
+				{ HttpRequestHeader.Authorization.ToString(), bearerToken },
 				{ HttpRequestHeader.Accept.ToString(), "application/json" }
-			},
+			}
 		};
 
 		this._logger.LogInformation("content: " + JsonConvert.SerializeObject(policy));
