@@ -10,6 +10,6 @@ public class BasicConstraints
 	}
 
 	// ReSharper disable once InconsistentNaming
-	[JsonProperty("ca")] public bool IsCA { get; set; }
-	[JsonProperty("path_len_constraint")] public int PathLenConstraint { get; set; }
+	[JsonProperty("ca")] public bool IsCA { get; set; } = true;
+	[JsonProperty("path_len_constraint")] public int PathLenConstraint { get; set; } = 1;
 }

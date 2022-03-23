@@ -30,47 +30,43 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	public readonly Byte[] RootCertificate;
 
 	
-	public AzureKeyVaultCertificateAuthority(
-		ILogger<AzureKeyVaultCertificateAuthority> logger, 
-		string vaultName, 
-		string keyName, 
-		string fqdn)
+	public AzureKeyVaultCertificateAuthority(ILogger<AzureKeyVaultCertificateAuthority> logger, string vaultName, string keyName, string fqdn)
 	{
-		this._logger = logger;
+		_logger = logger;
 		this.vaultName = vaultName;
-		this._keyName = keyName;
-		this._fqdn = fqdn;
+		_keyName = keyName;
+		_fqdn = fqdn;
 
-		this._vaultUri = "https://" + this.vaultName + ".vault.azure.net/";
+		_vaultUri = "https://" + vaultName + ".vault.azure.net/";
 		
-		this._keyClient = new KeyClient(
-			vaultUri: new Uri(this._vaultUri), 
-			credential: this._credential
+		_keyClient = new KeyClient(
+			vaultUri: new Uri(_vaultUri), 
+			credential: _credential
 		);
 
-		this._certificateClient = new CertificateClient(
-			vaultUri: new Uri(this._vaultUri), 
-			credential: this._credential
+		_certificateClient = new CertificateClient(
+			vaultUri: new Uri(_vaultUri), 
+			credential: _credential
 		);
 
 		try {
-			this._logger.LogInformation("Attempting to get Key: " + keyName);
-			this._keyMetadata = this._keyClient.GetKey(this._keyName);
+			_logger.LogInformation("Attempting to get Key: " + keyName);
+			_keyMetadata = _keyClient.GetKey(_keyName);
 		}
 		catch(Azure.RequestFailedException error)
 		{
-			this._logger.LogError("Key Not Found.  Attempting to Create Root CA/Key in AKV.");
-			this._logger.LogInformation(error.ToString());
+			_logger.LogError("Key Not Found.  Attempting to Create Root CA/Key in AKV.");
+			_logger.LogInformation(error.ToString());
 			
 			CreateRootCaInKeyVault();
-			this._keyMetadata = this._keyClient.GetKey(this._keyName);
+			_keyMetadata = _keyClient.GetKey(_keyName);
 		}
 
-		this.RootCertificate = GetRootCertificate();
+		RootCertificate = GetRootCertificate();
 		
-		this._cryptographyClient = new CryptographyClient(
-			keyId: this._keyMetadata.Id, 
-			credential: this._credential
+		_cryptographyClient = new CryptographyClient(
+			keyId: _keyMetadata.Id, 
+			credential: _credential
 		);
 		
 	}
@@ -86,21 +82,21 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	// - Make HTTP call to vault certificate endpoint with policy as payload
 	protected override void CreateRootCaInKeyVault()
 	{
-		this._logger.LogInformation("Synchronously Generating RootCA.");
+		_logger.LogInformation("Synchronously Generating RootCA.");
 
-		AccessToken token =  this._credential.GetToken(
+		AccessToken token =  _credential.GetToken(
 			new Azure.Core.TokenRequestContext(
 				new[] { "https://vault.azure.net/.default" },
 				null
 			)
 		);
 
-		String requestUri = this._vaultUri + "/certificates/" + this._keyName + "/create?api-version=7.0";
+		String requestUri = _vaultUri + "/certificates/" + _keyName + "/create?api-version=7.0";
 		String bearerToken = "Bearer " + token.Token;
 
 		CertificatePolicy certificatePolicy = new CertificatePolicy(
 			keyProperties: new KeyProperties(),
-			x509CertificateProperties: new X509CertificateProperties("CN=" + this._fqdn),
+			x509CertificateProperties: new X509CertificateProperties("CN=" + _fqdn),
 			issuerParameters: new IssuerParameters()
 		);
 
@@ -119,22 +115,22 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			}
 		};
 
-		this._logger.LogDebug("content: " + JsonConvert.SerializeObject(policy));
+		_logger.LogDebug("content: " + JsonConvert.SerializeObject(policy));
 
-		HttpResponseMessage response = this.httpClient.Send(request);
+		HttpResponseMessage response = httpClient.Send(request);
 
 		StreamReader reader = new StreamReader(response.Content.ReadAsStream());
             
-    this._logger.LogDebug(reader.ReadToEnd());
+    _logger.LogDebug(reader.ReadToEnd());
 	}
 
 	protected override Byte[] GetRootCertificate()
 	{
-		return this._certificateClient.GetCertificate(this._keyName).Value.Cer;
+		return _certificateClient.GetCertificate(_keyName).Value.Cer;
 	}
 
 	public override Byte[]? SignContentWithRootCa(Byte[] content)
 	{
-		return this._cryptographyClient.SignData("RS256", content).Signature;
+		return _cryptographyClient.SignData("RS256", content).Signature;
 	}
 }
