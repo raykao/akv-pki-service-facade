@@ -94,14 +94,12 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		String requestUri = _vaultUri + "/certificates/" + _keyName + "/create?api-version=7.0";
 		String bearerToken = "Bearer " + token.Token;
 
-		CertificatePolicy certificatePolicy = new CertificatePolicy(
-			keyProperties: new KeyProperties(),
-			x509CertificateProperties: new X509CertificateProperties("CN=" + _fqdn),
-			issuerParameters: new IssuerParameters()
-		);
-
 		Policy policy = new Policy(
-			certificatePolicy: certificatePolicy
+			certificatePolicy: new CertificatePolicy(
+				keyProperties: new KeyProperties(),
+				x509CertificateProperties: new X509CertificateProperties("CN=" + _fqdn),
+				issuerParameters: new IssuerParameters()
+			)
 		);
 
 		StringContent content = new StringContent(JsonConvert.SerializeObject(policy), Encoding.UTF8, "application/json");
