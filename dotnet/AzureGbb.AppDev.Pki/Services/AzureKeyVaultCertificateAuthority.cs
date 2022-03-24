@@ -30,10 +30,10 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	public readonly Byte[] RootCertificate;
 
 	
-	public AzureKeyVaultCertificateAuthority(ILogger<AzureKeyVaultCertificateAuthority> logger, string vaultName, string keyName, string fqdn)
+	public AzureKeyVaultCertificateAuthority(ILogger<AzureKeyVaultCertificateAuthority> logger, string azureKeyVaultName, string keyName, string fqdn)
 	{
 		_logger = logger;
-		this.vaultName = vaultName;
+		vaultName = azureKeyVaultName;
 		_keyName = keyName;
 		_fqdn = fqdn;
 
