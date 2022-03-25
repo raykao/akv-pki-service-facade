@@ -1,11 +1,9 @@
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys;
-using Azure.Security.KeyVault.Keys.Cryptography;
 
 namespace AzureGBB.AppDev.Pki.Services;
 using System.Text;
 using System.Net;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Extensions.Logging;
@@ -28,8 +26,6 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	private readonly String _vaultUri;
 	private readonly KeyClient _keyClient;
 	private readonly CertificateClient _certificateClient;
-	private readonly RSA _caPrivateKey;
-	// private readonly CryptographyClient _cryptographyClient;
 	private readonly KeyVaultKey _keyMetadata;
 	private readonly ILogger<AzureKeyVaultCertificateAuthority> _logger;
 	// public readonly Byte[] RootCertificate;
@@ -55,7 +51,8 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			credential: _credential
 		);
 
-		try {
+		try
+		{
 			_logger.LogInformation("Attempting to get Key: " + keyName);
 			_keyMetadata = _keyClient.GetKey(_keyName);
 		}
@@ -68,15 +65,9 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			_keyMetadata = _keyClient.GetKey(_keyName);
 		}
 
-		RootCertificate = GetRootCertificate();
-		
-		_caPrivateKey = RSAKeyVaultProvider.RSAFactory.Create(_credential, _keyMetadata.Id, RootCertificate);
+		RootCertificate = GetRootCertificate();		
 
-		// _cryptographyClient = new CryptographyClient(
-		// 	keyId: _keyMetadata.Id, 
-		// 	credential: _credential
-		// );
-		
+		_caPrivateKey = RSAKeyVaultProvider.RSAFactory.Create(_credential, _keyMetadata.Id, RootCertificate);
 	}
 
 	// Version 4 of the KeyVault SDK does not allow the use of a full Custom Certificate Policy
@@ -145,19 +136,5 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 
 		// Certificate expires in 30days - should add ability to modify accordingly - but keep it low and use Passive Certificate Revocation (no Signed CRL)
 		return csr.Create(RootCertificate.SubjectName, RSASignatureGenerator(), DateTime.Today.AddDays(-1), DateTime.Today.AddDays(30), SimpleSerialNumberGenerator());
-	}
-
-	public override X509SignatureGenerator RSASignatureGenerator()
-	{
-		return X509SignatureGenerator.CreateForRSA(_caPrivateKey, RSASignaturePadding.Pkcs1);
-	}
-
-	private static Byte[] SimpleSerialNumberGenerator()
-	{
-		long today = DateTime.UtcNow.ToBinary();
-
-		Byte[] nowBytes = BitConverter.GetBytes(today);
-
-		return nowBytes;
 	}
 }
