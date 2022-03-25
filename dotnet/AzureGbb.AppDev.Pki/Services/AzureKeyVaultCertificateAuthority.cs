@@ -1,34 +1,40 @@
-using Newtonsoft.Json;
+using Azure.Security.KeyVault.Certificates;
+using Azure.Security.KeyVault.Keys;
+using Azure.Security.KeyVault.Keys.Cryptography;
+
+namespace AzureGBB.AppDev.Pki.Services;
+using System.Text;
+using System.Net;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Extensions.Logging;
 
-using Azure.Security.KeyVault.Keys;
-using Azure.Security.KeyVault.Certificates;
-using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Identity;
 using Azure.Core;
 
-namespace AzureGBB.AppDev.Pki.Services;
+using Newtonsoft.Json;
+
 using AzureGBB.AppDev.Pki.Models;
-using System.Text;
-using System.Net;
+using AzureGBB.AppDev.Pki.Models.RSA;
 
 public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 {
 	private readonly HttpClient httpClient = new HttpClient();
 	private readonly DefaultAzureCredential _credential = new DefaultAzureCredential();
-
 	private readonly string vaultName;
 	private readonly string _keyName;
 	private readonly string _fqdn;
 	private readonly String _vaultUri;
 	private readonly KeyClient _keyClient;
 	private readonly CertificateClient _certificateClient;
-	private readonly CryptographyClient _cryptographyClient;
+	private readonly RSA _caPrivateKey;
+	// private readonly CryptographyClient _cryptographyClient;
 	private readonly KeyVaultKey _keyMetadata;
 	private readonly ILogger<AzureKeyVaultCertificateAuthority> _logger;
-	public readonly Byte[] RootCertificate;
+	// public readonly Byte[] RootCertificate;
 
+	public readonly X509Certificate2 RootCertificate; 
 	
 	public AzureKeyVaultCertificateAuthority(ILogger<AzureKeyVaultCertificateAuthority> logger, string azureKeyVaultName, string keyName, string fqdn)
 	{
@@ -64,10 +70,12 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 
 		RootCertificate = GetRootCertificate();
 		
-		_cryptographyClient = new CryptographyClient(
-			keyId: _keyMetadata.Id, 
-			credential: _credential
-		);
+		_caPrivateKey = RSAKeyVaultProvider.RSAFactory.Create(_credential, _keyMetadata.Id, RootCertificate);
+
+		// _cryptographyClient = new CryptographyClient(
+		// 	keyId: _keyMetadata.Id, 
+		// 	credential: _credential
+		// );
 		
 	}
 
@@ -122,13 +130,34 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
     _logger.LogDebug(reader.ReadToEnd());
 	}
 
-	protected override Byte[] GetRootCertificate()
+	protected override X509Certificate2 GetRootCertificate()
 	{
-		return _certificateClient.GetCertificate(_keyName).Value.Cer;
+		Byte[] rootCertificate =_certificateClient.GetCertificate(_keyName).Value.Cer;
+		
+		return new X509Certificate2(rootCertificate);
 	}
 
-	public override Byte[]? SignContentWithRootCa(Byte[] content)
+	public override X509Certificate2 IssueLeafCertificate(string subjectName, RSAPublicKeyParameters publicKeyParams)
 	{
-		return _cryptographyClient.SignData("RS256", content).Signature;
+		RSAPublicKey publicKey = new RSAPublicKey(publicKeyParams);
+
+		CertificateRequest csr = publicKey.CreateCertificateSigningRequest(subjectName, RootCertificate.Extensions[RSAPublicKey.SubjectIdExtensionOid]);
+
+		// Certificate expires in 30days - should add ability to modify accordingly - but keep it low and use Passive Certificate Revocation (no Signed CRL)
+		return csr.Create(RootCertificate.SubjectName, RSASignatureGenerator(), DateTime.Today.AddDays(-1), DateTime.Today.AddDays(30), SimpleSerialNumberGenerator());
+	}
+
+	public override X509SignatureGenerator RSASignatureGenerator()
+	{
+		return X509SignatureGenerator.CreateForRSA(_caPrivateKey, RSASignaturePadding.Pkcs1);
+	}
+
+	private static Byte[] SimpleSerialNumberGenerator()
+	{
+		long today = DateTime.UtcNow.ToBinary();
+
+		Byte[] nowBytes = BitConverter.GetBytes(today);
+
+		return nowBytes;
 	}
 }
