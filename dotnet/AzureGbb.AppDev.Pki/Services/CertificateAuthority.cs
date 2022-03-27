@@ -1,5 +1,4 @@
 ﻿namespace AzureGBB.AppDev.Pki.Services;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using AzureGBB.AppDev.Pki.Models.RSA;
 
@@ -10,7 +9,7 @@ public abstract class CertificateAuthority
 	protected abstract X509SignatureGenerator RSASignatureGenerator();
 	public abstract String IssueLeafCertificate(string subjectName, RSAPublicKeyParameters publicKey);
 
-	protected static Byte[] SimpleSerialNumberGenerator()
+	protected static Byte[] DefaultSerialNumberGenerator()
 	{
 		long today = DateTime.UtcNow.ToBinary();
 

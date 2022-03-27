@@ -141,7 +141,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 		CertificateRequest csr = publicKey.CreateCertificateSigningRequest(subjectName, RootCertificate.Extensions[RSAPublicKey.SubjectIdExtensionOid]);
 
 		// Certificate expires in 30days - should add ability to modify accordingly - but keep it low and use Passive Certificate Revocation (no Signed CRL)
-		X509Certificate2 signedCert = csr.Create(RootCertificate.SubjectName, RSASignatureGenerator(), DateTime.Today.AddDays(-1), DateTime.Today.AddDays(30), SimpleSerialNumberGenerator());
+		X509Certificate2 signedCert = csr.Create(RootCertificate.SubjectName, RSASignatureGenerator(), DateTime.Today.AddDays(-1), DateTime.Today.AddDays(30), DefaultSerialNumberGenerator());
 
 		byte[] rawCert = signedCert.RawData;
 		char[] certificatePem = PemEncoding.Write("CERTIFICATE", rawCert);
