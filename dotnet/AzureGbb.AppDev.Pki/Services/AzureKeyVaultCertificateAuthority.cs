@@ -4,6 +4,7 @@ using Azure.Security.KeyVault.Keys;
 namespace AzureGBB.AppDev.Pki.Services;
 using System.Text;
 using System.Net;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Extensions.Logging;
@@ -28,9 +29,9 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	private readonly CertificateClient _certificateClient;
 	private readonly KeyVaultKey _keyMetadata;
 	private readonly ILogger<AzureKeyVaultCertificateAuthority> _logger;
-	// public readonly Byte[] RootCertificate;
 
-	public readonly X509Certificate2 RootCertificate; 
+	private readonly RSA _caPrivateKey;
+	public readonly X509Certificate2 RootCertificate;
 	
 	public AzureKeyVaultCertificateAuthority(ILogger<AzureKeyVaultCertificateAuthority> logger, string azureKeyVaultName, string keyName, string fqdn)
 	{
@@ -65,8 +66,8 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			_keyMetadata = _keyClient.GetKey(_keyName);
 		}
 
-		RootCertificate = GetRootCertificate();		
-
+		RootCertificate = GetRootCertificate();
+	
 		_caPrivateKey = RSAKeyVaultProvider.RSAFactory.Create(_credential, _keyMetadata.Id, RootCertificate);
 	}
 
@@ -124,17 +125,27 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	protected override X509Certificate2 GetRootCertificate()
 	{
 		Byte[] rootCertificate =_certificateClient.GetCertificate(_keyName).Value.Cer;
-		
+	
 		return new X509Certificate2(rootCertificate);
 	}
 
-	public override X509Certificate2 IssueLeafCertificate(string subjectName, RSAPublicKeyParameters publicKeyParams)
+	protected override X509SignatureGenerator RSASignatureGenerator()
+	{
+		return X509SignatureGenerator.CreateForRSA(_caPrivateKey, RSASignaturePadding.Pkcs1);
+	}
+
+	public override String IssueLeafCertificate(string subjectName, RSAPublicKeyParameters publicKeyParams)
 	{
 		RSAPublicKey publicKey = new RSAPublicKey(publicKeyParams);
 
 		CertificateRequest csr = publicKey.CreateCertificateSigningRequest(subjectName, RootCertificate.Extensions[RSAPublicKey.SubjectIdExtensionOid]);
 
 		// Certificate expires in 30days - should add ability to modify accordingly - but keep it low and use Passive Certificate Revocation (no Signed CRL)
-		return csr.Create(RootCertificate.SubjectName, RSASignatureGenerator(), DateTime.Today.AddDays(-1), DateTime.Today.AddDays(30), SimpleSerialNumberGenerator());
+		X509Certificate2 signedCert = csr.Create(RootCertificate.SubjectName, RSASignatureGenerator(), DateTime.Today.AddDays(-1), DateTime.Today.AddDays(30), SimpleSerialNumberGenerator());
+
+		byte[] rawCert = signedCert.RawData;
+		char[] certificatePem = PemEncoding.Write("CERTIFICATE", rawCert);
+
+		return new string(certificatePem);
 	}
 }
