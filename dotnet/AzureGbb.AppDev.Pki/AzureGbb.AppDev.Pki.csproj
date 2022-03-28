@@ -15,6 +15,7 @@
     <PackageReference Include="RSAKeyVaultProvider" Version="2.1.1" />
     <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
     <PackageReference Include="update" Version="2.4.7" />
+    <PackageReference Include="xunit" Version="2.4.1" />
   </ItemGroup>
 
 </Project>
