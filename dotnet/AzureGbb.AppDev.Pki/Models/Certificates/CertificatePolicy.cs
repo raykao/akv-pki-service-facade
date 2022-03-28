@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace AzureGBB.AppDev.Pki.Models;
+namespace AzureGBB.AppDev.Pki.Models.Certificates;
 
 public partial class CertificatePolicy
 {

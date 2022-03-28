@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 // using System.Text.Json.Serialization;
 
-namespace AzureGBB.AppDev.Pki.Models;
+namespace AzureGBB.AppDev.Pki.Models.Certificates;
 
 public partial class Attributes
 {

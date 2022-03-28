@@ -1,7 +1,8 @@
 using Newtonsoft.Json;
 
 
-namespace AzureGBB.AppDev.Pki.Models;
+namespace AzureGBB.AppDev.Pki.Models.Certificates;
+
 /// <summary>
 /// Action and its trigger that will be performed by Key Vault over the
 /// lifetime of a certificate.

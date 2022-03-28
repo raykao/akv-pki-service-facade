@@ -1,7 +1,7 @@
 // Partially Replicating Microsoft.Azure.KeyVault.Models
 using Newtonsoft.Json;
 
-namespace AzureGBB.AppDev.Pki.Models;
+namespace AzureGBB.AppDev.Pki.Models.Certificates;
 public partial class X509CertificateProperties
 {
 	public X509CertificateProperties(

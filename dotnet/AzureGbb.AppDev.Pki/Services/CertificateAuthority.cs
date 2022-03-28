@@ -1,5 +1,6 @@
 ﻿namespace AzureGBB.AppDev.Pki.Services;
 using System.Security.Cryptography.X509Certificates;
+using AzureGBB.AppDev.Pki.Models.Certificates;
 using AzureGBB.AppDev.Pki.Models.RSA;
 
 public abstract class CertificateAuthority

@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AzureGBB.AppDev.Pki.Models;
+namespace AzureGBB.AppDev.Pki.Models.Certificates;
+
 /// <summary>
 /// The subject alternate names of a X509 object.
 /// </summary>

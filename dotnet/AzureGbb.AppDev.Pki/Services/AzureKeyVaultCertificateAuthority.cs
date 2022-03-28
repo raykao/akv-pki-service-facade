@@ -14,7 +14,7 @@ using Azure.Core;
 
 using Newtonsoft.Json;
 
-using AzureGBB.AppDev.Pki.Models;
+using AzureGBB.AppDev.Pki.Models.Certificates;
 using AzureGBB.AppDev.Pki.Models.RSA;
 
 public class AzureKeyVaultCertificateAuthority : CertificateAuthority
@@ -125,7 +125,6 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	protected override X509Certificate2 GetRootCertificate()
 	{
 		Byte[] rootCertificate =_certificateClient.GetCertificate(_keyName).Value.Cer;
-	
 		return new X509Certificate2(rootCertificate);
 	}
 
