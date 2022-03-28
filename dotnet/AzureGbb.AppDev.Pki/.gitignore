@@ -1,0 +1,4 @@
+.tmp/
+
+appsettings.*.json
+!appsettings.example.json
