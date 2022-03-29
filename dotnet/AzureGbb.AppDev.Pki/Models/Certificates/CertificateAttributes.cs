@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace AzureGBB.AppDev.Pki.Models.Certificates;
 
@@ -62,7 +62,7 @@ public partial class CertificateAttributes : Attributes
 	/// 'Recoverable+Purgeable', 'Recoverable',
 	/// 'Recoverable+ProtectedSubscription'
 	/// </summary>
-	[JsonProperty(PropertyName = "recoveryLevel")]
+	[JsonPropertyName("recoveryLevel")]
 	public string? RecoveryLevel { get; private set; }
 
 }

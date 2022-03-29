@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace AzureGBB.AppDev.Pki.Models.Certificates;
 
@@ -54,44 +54,44 @@ public partial class CertificatePolicy
     /// <summary>
     /// Gets the certificate id.
     /// </summary>
-    [JsonProperty(PropertyName = "id")]
+    [JsonPropertyName("id")]
     public string? Id { get; private set; }
 
     /// <summary>
     /// Gets or sets properties of the key backing a certificate.
     /// </summary>
-    [JsonProperty(PropertyName = "key_props")]
+    [JsonPropertyName("key_props")]
     public KeyProperties? KeyProperties { get; set; }
 
     /// <summary>
     /// Gets or sets properties of the secret backing a certificate.
     /// </summary>
-    [JsonProperty(PropertyName = "secret_props")]
+    [JsonPropertyName("secret_props")]
     public SecretProperties? SecretProperties { get; set; }
 
     /// <summary>
     /// Gets or sets properties of the X509 component of a certificate.
     /// </summary>
-    [JsonProperty(PropertyName = "x509_props")]
+    [JsonPropertyName("x509_props")]
     public X509CertificateProperties? X509CertificateProperties { get; set; }
 
     /// <summary>
     /// Gets or sets actions that will be performed by Key Vault over the
     /// lifetime of a certificate.
     /// </summary>
-    [JsonProperty(PropertyName = "lifetime_actions")]
+    [JsonPropertyName("lifetime_actions")]
     public IList<LifetimeAction>? LifetimeActions { get; set; }
 
     /// <summary>
     /// Gets or sets parameters for the issuer of the X509 component of a
     /// certificate.
     /// </summary>
-    [JsonProperty(PropertyName = "issuer")]
+    [JsonPropertyName("issuer")]
     public IssuerParameters? IssuerParameters { get; set; }
 
     /// <summary>
     /// Gets or sets the certificate attributes.
     /// </summary>
-    [JsonProperty(PropertyName = "attributes")]
+    [JsonPropertyName("attributes")]
     public CertificateAttributes? Attributes { get; set; }
 }

@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace AzureGBB.AppDev.Pki.Models.Certificates;
 
@@ -31,6 +31,6 @@ public partial class Policy
     /// <summary>
     /// Gets the certificate id.
     /// </summary>
-    [JsonProperty(PropertyName = "policy")]
+    [JsonPropertyName("policy")]
     public CertificatePolicy? CertificatePolicy { get; private set; }
 }

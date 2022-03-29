@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace AzureGBB.AppDev.Pki.Models.Certificates;
 
@@ -47,28 +47,28 @@ public partial class KeyProperties
     /// <summary>
     /// Gets or sets indicates if the private key can be exported.
     /// </summary>
-    [JsonProperty(PropertyName = "exportable")]
+    [JsonPropertyName("exportable")]
     public bool Exportable { get; } = false;
 
     /// <summary>
     /// Gets or sets indicates if the same key pair will be used on
     /// certificate renewal.
     /// </summary>
-    [JsonProperty(PropertyName = "reuse_key")]
+    [JsonPropertyName("reuse_key")]
     public bool ReuseKey { get; } = false;
 
     /// <summary>
     /// Gets or sets the type of key pair to be used for the certificate.
     /// Possible values include: 'EC', 'EC-HSM', 'RSA', 'RSA-HSM', 'oct'
     /// </summary>
-    [JsonProperty(PropertyName = "kty")]
+    [JsonPropertyName("kty")]
     public string KeyType { get; set; } = "RSA";
 
     /// <summary>
     /// Gets or sets the key size in bits. For example: 2048, 3072, or 4096
     /// for RSA.
     /// </summary>
-    [JsonProperty(PropertyName = "key_size")]
+    [JsonPropertyName("key_size")]
     public int KeySize { get; set; } = 2048;
 
     /// <summary>
@@ -76,7 +76,7 @@ public partial class KeyProperties
     /// Microsoft.Azure.KeyVault.WebKey.JsonWebKeyCurveName. Possible values include: 'P-256', 'P-384',
     /// 'P-521', 'P-256K'
     /// </summary>
-    [JsonProperty(PropertyName = "crv")]
+    [JsonPropertyName("crv")]
     public string? Curve { get; set; }
 
 }

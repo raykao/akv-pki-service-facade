@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 
 namespace AzureGBB.AppDev.Pki.Models.Certificates;
@@ -38,12 +38,12 @@ public partial class LifetimeAction
 	/// <summary>
 	/// Gets or sets the condition that will execute the action.
 	/// </summary>
-	[JsonProperty(PropertyName = "trigger")]
+	[JsonPropertyName("trigger")]
 	public Trigger? Trigger { get; set; }
 
 	/// <summary>
 	/// Gets or sets the action that will be executed.
 	/// </summary>
-	[JsonProperty(PropertyName = "action")]
+	[JsonPropertyName("action")]
 	public Action? Action { get; set; }
 }

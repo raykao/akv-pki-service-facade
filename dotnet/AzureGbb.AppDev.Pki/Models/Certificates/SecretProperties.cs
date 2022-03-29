@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace AzureGBB.AppDev.Pki.Models.Certificates;
 public partial class SecretProperties
@@ -29,7 +29,7 @@ public partial class SecretProperties
 	/// <summary>
 	/// Gets or sets the media type (MIME type).
 	/// </summary>
-	[JsonProperty(PropertyName = "contentType")]
+	[JsonPropertyName("contentType")]
 	public string? ContentType { get; set; }
 
 }

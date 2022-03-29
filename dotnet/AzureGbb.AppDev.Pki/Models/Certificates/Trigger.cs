@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace AzureGBB.AppDev.Pki.Models.Certificates;
 
@@ -37,7 +37,7 @@ public partial class Trigger
 	/// Gets or sets percentage of lifetime at which to trigger. Value
 	/// should be between 1 and 99.
 	/// </summary>
-	[JsonProperty(PropertyName = "lifetime_percentage")]
+	[JsonPropertyName("lifetime_percentage")]
 	public int? LifetimePercentage { get; set; }
 
 	/// <summary>
@@ -46,6 +46,6 @@ public partial class Trigger
 	/// validity_in_months is 36, then value should be between 1 and 972
 	/// (36 * 27).
 	/// </summary>
-	[JsonProperty(PropertyName = "days_before_expiry")]
+	[JsonPropertyName("days_before_expiry")]
 	public int? DaysBeforeExpiry { get; set; }
 }

@@ -1,5 +1,5 @@
 // Partially Replicating Microsoft.Azure.KeyVault.Models
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace AzureGBB.AppDev.Pki.Models.Certificates;
 public partial class X509CertificateProperties
@@ -21,21 +21,21 @@ public partial class X509CertificateProperties
 		BasicConstraints = basicConstraints;
 	}
 
-	[JsonProperty(PropertyName = "subject")]
+	[JsonPropertyName("subject")]
 	public string? Subject { get; set; }
 
-	[JsonProperty(PropertyName = "ekus")]
+	[JsonPropertyName("ekus")]
 	public IList<string>? Ekus { get; set; } = new List<string> {"1.3.6.1.5.5.7.3.2", "1.3.6.1.5.5.7.3.1"};
 
-	[JsonProperty(PropertyName = "sans")]
+	[JsonPropertyName("sans")]
 	public SubjectAlternativeNames? SubjectAlternativeNames { get; set; }
 
-	[JsonProperty(PropertyName = "key_usage")]
+	[JsonPropertyName("key_usage")]
 	public IList<string>? KeyUsage { get; set; } = new List<string> {"keyCertSign"};
 
-	[JsonProperty(PropertyName = "validity_months")]
+	[JsonPropertyName("validity_months")]
 	public int? ValidityInMonths { get; set; }
 
-	[JsonProperty("basic_constraints")]
+	[JsonPropertyName("basic_constraints")]
 	public BasicConstraints? BasicConstraints { get; set; } = new BasicConstraints(true, 1);
 }

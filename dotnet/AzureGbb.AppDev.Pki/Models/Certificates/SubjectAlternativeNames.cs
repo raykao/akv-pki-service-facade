@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,19 +44,19 @@ public partial class SubjectAlternativeNames
 	/// <summary>
 	/// Gets or sets email addresses.
 	/// </summary>
-	[JsonProperty(PropertyName = "emails")]
+	[JsonPropertyName("emails")]
 	public IList<string>? Emails { get; set; }
 
 	/// <summary>
 	/// Gets or sets domain names.
 	/// </summary>
-	[JsonProperty(PropertyName = "dns_names")]
+	[JsonPropertyName("dns_names")]
 	public IList<string>? DnsNames { get; set; }
 
 	/// <summary>
 	/// Gets or sets user principal names.
 	/// </summary>
-	[JsonProperty(PropertyName = "upns")]
+	[JsonPropertyName("upns")]
 	public IList<string>? Upns { get; set; }
 
 }

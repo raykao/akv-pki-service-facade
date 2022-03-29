@@ -1,5 +1,5 @@
-using Newtonsoft.Json;
 // using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace AzureGBB.AppDev.Pki.Models.Certificates;
 
@@ -46,35 +46,35 @@ public partial class Attributes
 	/// <summary>
 	/// Gets or sets determines whether the object is enabled.
 	/// </summary>
-	[JsonProperty(PropertyName = "enabled")]
+	[JsonPropertyName("enabled")]
 	public bool? Enabled { get; set; }
 
 	/// <summary>
 	/// Gets or sets not before date in UTC.
 	/// </summary>
 	// [JsonConverter(typeof(UnixTimeJsonConverter))]
-	[JsonProperty(PropertyName = "nbf")]
+	[JsonPropertyName("nbf")]
 	public System.DateTime? NotBefore { get; set; }
 
 	/// <summary>
 	/// Gets or sets expiry date in UTC.
 	/// </summary>
 	// [JsonConverter(typeof(UnixTimeJsonConverter))]
-	[JsonProperty(PropertyName = "exp")]
+	[JsonPropertyName("exp")]
 	public System.DateTime? Expires { get; set; }
 
 	/// <summary>
 	/// Gets creation time in UTC.
 	/// </summary>
 	// [JsonConverter(typeof(UnixTimeJsonConverter))]
-	[JsonProperty(PropertyName = "created")]
+	[JsonPropertyName("created")]
 	public System.DateTime? Created { get; private set; }
 
 	/// <summary>
 	/// Gets last updated time in UTC.
 	/// </summary>
 	// [JsonConverter(typeof(UnixTimeJsonConverter))]
-	[JsonProperty(PropertyName = "updated")]
+	[JsonPropertyName("updated")]
 	public System.DateTime? Updated { get; private set; }
 
 }

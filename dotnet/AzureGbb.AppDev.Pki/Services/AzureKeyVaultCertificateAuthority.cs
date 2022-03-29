@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Azure.Identity;
 using Azure.Core;
 
-using Newtonsoft.Json;
+using System.Text.Json;
 
 using AzureGBB.AppDev.Pki.Models.Certificates;
 using AzureGBB.AppDev.Pki.Models.RSA;
@@ -102,7 +102,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			)
 		);
 
-		StringContent content = new StringContent(JsonConvert.SerializeObject(policy), Encoding.UTF8, "application/json");
+		StringContent content = new StringContent(JsonSerializer.Serialize(policy), Encoding.UTF8, "application/json");
 
 		HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post ,requestUri)
 		{
@@ -113,7 +113,7 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			}
 		};
 
-		_logger.LogDebug("content: " + JsonConvert.SerializeObject(policy));
+		_logger.LogDebug("content: " + JsonSerializer.Serialize(policy));
 
 		HttpResponseMessage response = httpClient.Send(request);
 

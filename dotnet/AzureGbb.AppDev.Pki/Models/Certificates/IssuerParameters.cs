@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace AzureGBB.AppDev.Pki.Models.Certificates;
 public partial class IssuerParameters
@@ -42,21 +42,21 @@ public partial class IssuerParameters
 	/// Gets or sets name of the referenced issuer object or reserved
 	/// names; for example, 'Self' or 'Unknown'.
 	/// </summary>
-	[JsonProperty(PropertyName = "name")]
+	[JsonPropertyName("name")]
 	public string Name { get; } = "Self";
 
 	/// <summary>
 	/// Gets or sets type of certificate to be requested from the issuer
 	/// provider.
 	/// </summary>
-	[JsonProperty(PropertyName = "cty")]
+	[JsonPropertyName("cty")]
 	public string? CertificateType { get; set; }
 
 	/// <summary>
 	/// Gets or sets indicates if the certificates generated under this
 	/// policy should be published to certificate transparency logs.
 	/// </summary>
-	[JsonProperty(PropertyName = "cert_transparency")]
+	[JsonPropertyName("cert_transparency")]
 	public bool CertificateTransparency { get; set; } = false;
 
 }
