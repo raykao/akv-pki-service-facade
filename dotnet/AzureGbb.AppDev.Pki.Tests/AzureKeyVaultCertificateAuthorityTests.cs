@@ -1,12 +1,14 @@
 namespace AzureGBB.AppDev.Pki.Tests;
 
-using AzureGBB.AppDev.Pki.Services;
-using AzureGBB.AppDev.Pki.Models.RSA;
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using Azure.Identity;
+using AzureGBB.AppDev.Pki.Services;
+using AzureGBB.AppDev.Pki.Models.RSA;
 
 
 public class RootCaContextFixture : IDisposable
@@ -29,7 +31,18 @@ public class RootCaContextFixture : IDisposable
 				.AddFilter("LoggingConsoleApp.Program", LogLevel.Debug);
 		});
 
+		IConfiguration config = new ConfigurationBuilder()
+			.AddJsonFile("appsettings.test.json")
+			.AddEnvironmentVariables()
+			.Build();
+
+		ClientSecretCredential credential = new ClientSecretCredential(
+			clientId: config.GetValue<string>("AZURE_CLIENT_ID"), 
+			clientSecret: config.GetValue<string>("AZURE_CLIENT_SECRET"), 
+			tenantId: config.GetValue<string>("AZURE_TENANT_ID"));
+
 		RootCa = new AzureKeyVaultCertificateAuthority(
+			credential,
 			logger: loggerFactory.CreateLogger<AzureKeyVaultCertificateAuthority>(), 
 			azureKeyVaultName: _vaultName, 
 			keyName: _rootKeyName, 

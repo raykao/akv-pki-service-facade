@@ -9,7 +9,6 @@ using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Extensions.Logging;
 
-using Azure.Identity;
 using Azure.Core;
 
 using System.Text.Json;
@@ -20,7 +19,7 @@ using AzureGBB.AppDev.Pki.Models.RSA;
 public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 {
 	private readonly HttpClient httpClient = new HttpClient();
-	private readonly DefaultAzureCredential _credential = new DefaultAzureCredential();
+	private readonly TokenCredential _credential;
 	private readonly string vaultName;
 	private readonly string _keyName;
 	private readonly string _fqdn;
@@ -33,8 +32,9 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 	private readonly RSA _caPrivateKey;
 	public readonly X509Certificate2 RootCertificate;
 	
-	public AzureKeyVaultCertificateAuthority(ILogger<AzureKeyVaultCertificateAuthority> logger, string azureKeyVaultName, string keyName, string fqdn)
+	public AzureKeyVaultCertificateAuthority(TokenCredential azureCredential, ILogger<AzureKeyVaultCertificateAuthority> logger, string azureKeyVaultName, string keyName, string fqdn)
 	{
+		_credential = azureCredential;
 		_logger = logger;
 		vaultName = azureKeyVaultName;
 		_keyName = keyName;
@@ -88,7 +88,8 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			new Azure.Core.TokenRequestContext(
 				new[] { "https://vault.azure.net/.default" },
 				null
-			)
+			),
+			new CancellationToken()
 		);
 
 		String requestUri = _vaultUri + "/certificates/" + _keyName + "/create?api-version=7.0";

@@ -1,5 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using Azure.Identity;
 using AzureGBB.AppDev.Pki.Services;
 using AzureGBB.AppDev.Pki.Models.RSA;
 using System.Security.Cryptography;
@@ -15,11 +17,25 @@ using ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
 		.AddFilter("LoggingConsoleApp.Program", LogLevel.Debug);
 });
 
-String vaultName 	= "rkpkitest";
-String keyName		= "rootCa";
-String fqdn 			= "pki.raykao.dev";
+
+IConfiguration config = new ConfigurationBuilder()
+	.AddJsonFile("appsettings.test.json")
+	.AddEnvironmentVariables()
+	.Build();
+
+ClientSecretCredential credential = new ClientSecretCredential(
+	clientId: config.GetValue<string>("AZURE_CLIENT_ID"), 
+	clientSecret: config.GetValue<string>("AZURE_CLIENT_SECRET"), 
+	tenantId: config.GetValue<string>("AZURE_TENANT_ID")
+);
+
+
+String vaultName 	= config.GetValue<string>("vaultName");
+String keyName		= config.GetValue<string>("keyName");
+String fqdn 			= config.GetValue<string>("fqdn");
 
 AzureKeyVaultCertificateAuthority rootca = new AzureKeyVaultCertificateAuthority(
+	credential,
 	logger: loggerFactory.CreateLogger<AzureKeyVaultCertificateAuthority>(), 
 	azureKeyVaultName: vaultName, 
 	keyName: keyName, 

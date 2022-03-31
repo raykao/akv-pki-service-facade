@@ -632,4 +632,7 @@ yarn-error.log
 
 # End of https://www.gitignore.io/api/visualstudiocode,macos,aspnetcore,csharp,node,vue,vuejs
 
+.tmp/
 appsettings.Development.json
+appsettings.*.json
+!appsettings.example.json
