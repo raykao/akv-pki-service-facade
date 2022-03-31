@@ -52,14 +52,15 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			credential: _credential
 		);
 
+		_logger.LogInformation("Attempting to get Key: " + keyName);
 		try
 		{
-			_logger.LogInformation("Attempting to get Key: " + keyName);
 			_keyMetadata = _keyClient.GetKey(_keyName);
+			_logger.LogInformation("Key: '" + keyName + "' Found");
 		}
 		catch(Azure.RequestFailedException error)
 		{
-			_logger.LogError("Key Not Found.  Attempting to Create Root CA/Key in AKV.");
+			_logger.LogError("Key Not Found.  Attempting to Generate a Root CA/Key in AKV.");
 			_logger.LogInformation(error.ToString());
 			
 			CreateRootCaInKeyVault();
@@ -114,13 +115,20 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 			}
 		};
 
-		_logger.LogDebug("content: " + JsonSerializer.Serialize(policy));
-
 		HttpResponseMessage response = httpClient.Send(request);
 
-		StreamReader reader = new StreamReader(response.Content.ReadAsStream());
+		if(response.IsSuccessStatusCode)
+		{
+			_logger.LogInformation("Successfully created RootCA Cert and Keys");
+		}
+		else
+		{
+			throw new Exception("RootCA Cert and Key could not be created.");
+		}
+
+		// StreamReader reader = new StreamReader(response.Content.ReadAsStream());
             
-    _logger.LogDebug(reader.ReadToEnd());
+    // _logger.LogDebug(reader.ReadToEnd());
 	}
 
 	protected override X509Certificate2 GetRootCertificate()
@@ -136,16 +144,22 @@ public class AzureKeyVaultCertificateAuthority : CertificateAuthority
 
 	public override String IssueLeafCertificate(string subjectName, RSAPublicKeyParameters publicKeyParams)
 	{
+		_logger.LogInformation("Creating a new Leaf/Client Certificate.");
+		
+		_logger.LogInformation("Regenerating Client RSA Public Key.");
 		RSAPublicKey publicKey = new RSAPublicKey(publicKeyParams);
 
+		_logger.LogInformation("Creating a Certificate Signing Request.");
 		CertificateRequest csr = publicKey.CreateCertificateSigningRequest(subjectName, RootCertificate.Extensions[RSAPublicKey.SubjectIdExtensionOid]);
 
+		_logger.LogInformation("Signing CSR with RootCA Key.");
 		// Certificate expires in 30days - should add ability to modify accordingly - but keep it low and use Passive Certificate Revocation (no Signed CRL)
 		X509Certificate2 signedCert = csr.Create(RootCertificate.SubjectName, RSASignatureGenerator(), DateTime.Today.AddDays(-1), DateTime.Today.AddDays(30), DefaultSerialNumberGenerator());
 
 		byte[] rawCert = signedCert.RawData;
 		char[] certificatePem = PemEncoding.Write("CERTIFICATE", rawCert);
 
+		_logger.LogInformation("Certificate Signing Complete.  Certificate Issued.");
 		return new string(certificatePem);
 	}
 }
